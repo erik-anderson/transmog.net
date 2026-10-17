@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transmog — See it. Shape it. Send it.</title>
+  <meta name="description" content="A free, open-source web debugging proxy for Windows. Inspect HTTP traffic, understand timing, and edit and replay requests.">
+  <meta name="theme-color" content="#182d38">
+  <link rel="canonical" href="https://transmog.net/">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Transmog — See it. Shape it. Send it.">
+  <meta property="og:description" content="A free, open-source web debugging proxy for Windows.">
+  <meta property="og:url" content="https://transmog.net/">
+  <meta property="og:image" content="https://transmog.net/assets/screenshots/traffic.png">
+  <meta property="og:image:alt" content="Transmog inspecting an HTTP request and its JSON response.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="styles.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="wordmark" href="./" aria-label="Transmog home"><img src="assets/logo.svg" width="48" height="48" alt=""><span>Transmog<span class="wordmark-dot">.</span></span></a>
+    <nav aria-label="Main navigation">
+      <a href="#screenshots">Take a look</a>
+      <a href="https://github.com/erik-anderson/transmog">GitHub <span aria-hidden="true">↗</span></a>
+      <a class="nav-download" href="#download">Get Transmog <span aria-hidden="true">↓</span></a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> THE WEB, UNDER THE HOOD</p>
+      <div class="hero-intro">
+        <h1 id="hero-title">See it.<br>Shape it. <span class="accent">Send it.</span></h1>
+        <div class="hero-copy">
+          <p>A web debugging proxy that puts your app’s traffic in your hands. Inspect requests, find the surprises, and try a different response.</p>
+          <a class="button button-dark" href="https://github.com/erik-anderson/transmog/releases">Download Windows preview <span aria-hidden="true">↗</span></a>
+          <p class="availability">Free &amp; open source <span aria-hidden="true">·</span> Windows x64 &amp; ARM64</p>
+        </div>
+      </div>
+      <figure class="hero-figure" id="screenshots">
+        <div class="figure-bar"><span><span class="mini-mark" aria-hidden="true">↔</span> A closer look at every exchange</span><span class="figure-tag">TRANSMOG / TRAFFIC</span></div>
+        <a class="screenshot-link" href="assets/screenshots/traffic.png" data-lightbox="Traffic inspector" aria-label="Enlarge the Traffic inspector screenshot">
+          <img src="assets/screenshots/traffic.png" width="2880" height="1800" fetchpriority="high" alt="Transmog showing captured requests, status codes and durations, with request headers and a JSON response side by side.">
+          <span class="zoom-hint" aria-hidden="true">↗ Expand screenshot</span>
+        </a>
+        <figcaption><span>Find the request. Read both sides of the conversation.</span><span class="sample-note">Actual app UI · Sample traffic</span></figcaption>
+      </figure>
+    </section>
+    <div class="protocol-strip" aria-label="Supported traffic and formats"><div class="wrap"><span>HTTP / HTTPS</span><span>WebSockets</span><span>Server-sent events</span><span>JSON &amp; binary bodies</span><span>Saved traces</span></div></div>
+    <section class="workbench wrap" aria-labelledby="workbench-title">
+      <div class="section-intro"><p class="eyebrow">FOLLOW THE CLUES</p><h2 id="workbench-title">From “that’s odd”<br>to “there it is.”</h2><p>Keep the request, the response, and the bigger picture together.</p></div>
+      <div class="feature-grid">
+        <article class="feature">
+          <div class="feature-heading"><span class="feature-number">01 / TIMING</span><h3>See where the time goes.</h3><p>Follow requests across a timeline. Spot slow responses, overlaps, and retries.</p></div>
+          <a class="screenshot-link feature-shot" href="assets/screenshots/timeline.png" data-lightbox="Request timeline" aria-label="Enlarge the request timeline screenshot"><img src="assets/screenshots/timeline.png" width="2880" height="1800" loading="lazy" alt="Transmog’s timeline showing the start, overlap and duration of twelve sample web requests."><span class="zoom-hint" aria-hidden="true">↗ Expand screenshot</span></a>
+        </article>
+        <article class="feature">
+          <div class="feature-heading"><span class="feature-number">02 / REPLAY</span><h3>Change it. Try it again.</h3><p>Take a captured request into Composer, change the details, and inspect the result.</p></div>
+          <a class="screenshot-link feature-shot" href="assets/screenshots/composer.png" data-lightbox="Request composer" aria-label="Enlarge the request composer screenshot"><img src="assets/screenshots/composer.png" width="2880" height="1800" loading="lazy" alt="Transmog’s Composer with an edited product query and the returned JSON response alongside it."><span class="zoom-hint" aria-hidden="true">↗ Expand screenshot</span></a>
+        </article>
+      </div>
+      <div class="more-tools"><p><strong>Make the next response your own.</strong> Pause exchanges with breakpoints, rewrite headers, or serve a saved response.</p><span aria-hidden="true">↔</span></div>
+    </section>
+    <section class="download-section" id="download" aria-labelledby="download-title">
+      <div class="wrap download-inner"><div><p class="eyebrow">YOURS TO EXPLORE</p><h2 id="download-title">Open the hood.</h2><p>Free to use. Open to change. MIT licensed.</p></div><div class="download-actions"><a class="button button-mint" href="https://github.com/erik-anderson/transmog/releases">Download Windows preview <span aria-hidden="true">↗</span></a><p>Canary builds · Actively developing</p><a class="source-link" href="https://github.com/erik-anderson/transmog">Explore the source <span aria-hidden="true">↗</span></a></div></div>
+    </section>
+  </main>
+  <footer class="site-footer wrap"><a class="wordmark" href="./"><img src="assets/logo.svg" width="36" height="36" alt=""><span>Transmog.</span></a><p>A little more clarity. A lot less guessing.</p><a href="https://github.com/erik-anderson/transmog/issues">Feedback &amp; issues <span aria-hidden="true">↗</span></a></footer>
+  <dialog class="lightbox" aria-labelledby="lightbox-title">
+    <div class="lightbox-toolbar"><h2 id="lightbox-title">Screenshot</h2><a class="original-link" href="assets/screenshots/traffic.png" target="_blank" rel="noopener">Open full size <span aria-hidden="true">↗</span></a><button class="close-lightbox" type="button" aria-label="Close screenshot">Close <span aria-hidden="true">×</span></button></div>
+    <div class="lightbox-image"><img width="2880" height="1800" alt=""></div>
+  </dialog>
+</body>
+</html>

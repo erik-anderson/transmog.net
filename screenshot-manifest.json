@@ -1,0 +1,42 @@
+{
+  "source": "https://github.com/erik-anderson/transmog.git",
+  "commit": "3d046a6ea222e070780e0d3755bac5185dff372f",
+  "fixtureHarnessSha256": "27426c89cb274963a65a585ab749826a0e9e9348c34365752fd4f2e96461177b",
+  "fixtureSha256": "fd8db3c9b10664745fee8a36e74c651e851c2c979ed3766d5793b64603c05990",
+  "node": "v24.18.0",
+  "platform": "win32",
+  "browser": "153.0.8010.12",
+  "uiLockSha256": "dc40110fd7a9d8ecc394ed28210c9684497606cb2b51b31cdd88ddbd68e75123",
+  "browserLockSha256": "7b9300b016852fa1c88a9a504618ecc69a103a3a33df5b405848dc110852cd9e",
+  "capture": {
+    "repository": "https://github.com/erik-anderson/transmog.git",
+    "commit": "3d046a6ea222e070780e0d3755bac5185dff372f",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "deviceScaleFactor": 2,
+    "locale": "en-US",
+    "timezoneId": "UTC",
+    "colorScheme": "light",
+    "fixedTime": "2026-10-01T12:00:00.000Z"
+  },
+  "images": {
+    "traffic.png": {
+      "sha256": "dcac7fa0c1d9c56d959d8aa16b3f33ef90887742c4c176d4b839b610972f93f9",
+      "width": 2880,
+      "height": 1800
+    },
+    "timeline.png": {
+      "sha256": "f09866803ec9e95020e0f2a0ba5eccc8ec5f7167b5d0e760144cee1ccd1ad267",
+      "width": 2880,
+      "height": 1800
+    },
+    "composer.png": {
+      "sha256": "da1a3f97ca93f14ab0126a6f491c08f8fd52efdd6cf17e2574076b372679a8d6",
+      "width": 2880,
+      "height": 1800
+    }
+  },
+  "generatorSha256": "e3be2ad4da416b12e3406aa8eadb14e1a90e5dfe4963832cce6933cde0c547b1"
+}

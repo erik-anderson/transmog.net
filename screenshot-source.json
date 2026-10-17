@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/erik-anderson/transmog.git",
+  "commit": "3d046a6ea222e070780e0d3755bac5185dff372f",
+  "viewport": { "width": 1440, "height": 900 },
+  "deviceScaleFactor": 2,
+  "locale": "en-US",
+  "timezoneId": "UTC",
+  "colorScheme": "light",
+  "fixedTime": "2026-10-01T12:00:00.000Z"
+}
