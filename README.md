@@ -59,7 +59,7 @@ This updates the source pin, all three PNGs, and their manifest together. Review
 
 ## Domain
 
-GitHub Pages is configured for `transmog.net`. At the DNS provider, set these records:
+GitHub Pages is configured for `transmog.net`. The domain currently uses Cloudflare nameservers (`gabe.ns.cloudflare.com` and `kia.ns.cloudflare.com`), so make the DNS changes in Cloudflare. Set all website records to **DNS only** (gray cloud), with proxying disabled:
 
 | Type | Host | Value |
 | --- | --- | --- |
@@ -69,7 +69,7 @@ GitHub Pages is configured for `transmog.net`. At the DNS provider, set these re
 | A | @ | 185.199.111.153 |
 | CNAME | www | erik-anderson.github.io |
 
-Replace conflicting web-hosting records at `@` and `www`. Preserve mail records. If the apex has existing AAAA records, remove them or replace them with GitHub's four addresses: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`. Use the default TTL (or 3600 seconds).
+Replace conflicting web-hosting A/CNAME records at `@` and `www`. Preserve mail and other unrelated records. If the apex has existing AAAA records, remove them or replace them with GitHub's four addresses: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`. Use Auto TTL (or 3600 seconds).
 
 After DNS resolves to GitHub and its certificate is issued, enable **Enforce HTTPS** in Settings → Pages. GitHub redirects `www` to the configured apex. Domain registration/renewal remains with the registrar. [GitHub's current DNS instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site).
 
