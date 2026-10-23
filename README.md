@@ -9,7 +9,7 @@ The public site contains product presentation and download links. App tutorials 
 Use Node.js 24 or newer. The published site is plain HTML, CSS, JavaScript and images; there is no runtime framework, database, analytics, third-party font request, or application backend.
 
 ```sh
-npm ci
+npm ci --ignore-scripts
 npx playwright install chromium
 npm run build
 npm run check
@@ -22,40 +22,35 @@ Pushes to `main` run the checks and publish `dist/`. Pull requests run the same 
 
 ## Reproduce the product screenshots
 
-The screenshots are the app's **production WebUI templates and client bundle**, rendered in the Chromium version pinned by the app's Playwright lockfile. The app's existing command fixture supplies the native bridge; `scripts/screenshot-fixture.mjs` supplies fictional `.test` traffic. This renders the desktop content, without Windows window borders. It never starts a real proxy, installs certificates, contacts an example server, or uses a personal capture.
+The eight screenshots come from the **released Windows app**, including its native captured-page previews. The current source is v0.1.10 Canary; `screenshot-source.json` pins its source commit and hashes for the app and both worker executables. The release installer was checked against the release's published `SHA256SUMS` before extraction.
+
+The generator imports fictional `.test` traffic into an isolated temporary profile. It uses production commands and controls, without changing app templates or screenshot pixels. It never starts a proxy, installs certificates, or uses a personal capture. Timing and TLS metadata are synthetic examples, not performance measurements. Certificate screenshots use the app's public test certificates; the illustrated TLS connection uses classical X25519. PQC capability statements are grounded in the released implementation, not inferred from that screenshot.
 
 1. Use a clean checkout of the application at the commit in `screenshot-source.json`. Keep it separate from ongoing app edits.
-2. Prepare that checkout using the app's development prerequisites (Python 3.11+, Node 24+, and the native tools required by its `scripts/dev-env.py --check`). Install its locked UI and browser dependencies:
-
-   ```sh
-   npm --prefix /path/to/transmog/apps/desktop/ui ci
-   npm --prefix /path/to/transmog/e2e/playwright ci
-   ```
-
-   From the app's `e2e/playwright` directory run `npx playwright install chromium`.
+2. Use Windows with WebView2, Python 3.11+, Node 24+, and the native tools required by the app's `scripts/dev-env.py --check`. Extract the pinned release installer into a separate directory, retaining `transmog.exe`, `transmog-preview-worker.exe`, and `transmog-script-host.exe` together. The screenshot generator does not build or install the application.
 3. From this website repository run:
 
    ```sh
-   npm run screenshots -- --app /path/to/transmog --python /path/to/python
+   npm run screenshots -- --app /path/to/transmog --native-executable /path/to/extracted/transmog.exe --python /path/to/python
    npm run build
    npm run check
    ```
 
-   `--python` is optional when `TRANSMOG_PYTHON` or a working `python` (Windows) / `python3` is available. The script checks the app environment, rebuilds its UI, renders fixed data, selects request #4, captures the Traffic view, opens Timeline and shows all matches, then edits and sends a simulated Composer request. No desktop source files are modified.
+   `--python` is optional when `TRANSMOG_PYTHON` or a working `python` is available. The script checks the app environment, copies the release executables into an owned temporary directory, imports the fixture, and captures Traffic, Auth, timing, response editing, previews, certificates, and connection details. It verifies that the modified preview differs and that a saved demo reopens after clearing Traffic. No desktop source files are modified.
 
-The viewport, scale, theme, clock, locale and timezone are fixed in `screenshot-source.json`. `screenshot-manifest.json` records the app commit, fixture and dependency hashes, browser version, OS, Node version and image hashes. Use the same OS and installed fonts for pixel-identical output; Chromium font rendering differs across operating systems. The initial captures use Windows. The adapter reads the fixture block from the app's `check-workspaces.mjs`; if its explicit boundary changes, capture stops with an error instead of silently using a stale mock.
+The app viewport is 1440 × 900 and the preview viewport is 900 × 600, both at 2× scale. The generator applies the viewports, scale, sample capture time, locale, theme, and timezone from `screenshot-source.json`. `screenshot-manifest.json` records the app commit, executable, fixture and generator hashes, WebView2 version, OS, Node version, dimensions, and image hashes. The generator uses helpers from the pinned app checkout, stages images until all capture assertions pass, and records cleanup evidence under ignored `.cache/`.
 
-Add `--verify` to the capture command to render into ignored `.cache/screenshot-verify/` and compare the images byte for byte with the saved manifest, without replacing the site images.
+Add `--verify` to render into ignored `.cache/screenshot-verify/` without replacing the site images. This repeats the behavioral assertions and checks the image inventory; review the regenerated images visually because native browser and font updates can change pixels. `npm run check` verifies the exact published image hashes and generator provenance without launching the desktop app.
 
 ### Refresh after an app update
 
-Check out the intended new **committed** app revision, update its locked dependencies as needed, then run:
+Check out the intended **released** app revision, verify and extract its release installer, then run:
 
 ```sh
-npm run screenshots -- --app /path/to/transmog --python /path/to/python --update-source
+npm run screenshots -- --app /path/to/transmog --native-executable /path/to/extracted/transmog.exe --python /path/to/python --update-source
 ```
 
-This updates the source pin, all three PNGs, and their manifest together. Review every image at full size and check the page before committing them. Keep examples fictional. Update selectors or the small fixture adapter if the app's commands or UI change. Do not redraw the app or patch captured pixels.
+This updates the source pin, all eight PNGs, and their manifest together. Review every image at full size and check the page before committing them. Keep examples fictional. Update selectors and fixture records when the app's commands or UI change. Do not redraw the app or patch captured pixels.
 
 ## Domain
 

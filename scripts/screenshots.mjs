@@ -1,106 +1,11 @@
-import assert from 'node:assert/strict';
-import {createHash} from 'node:crypto';
-import {execFileSync} from 'node:child_process';
-import {readFile,writeFile,mkdir} from 'node:fs/promises';
-import {createRequire} from 'node:module';
-import {resolve,dirname,join} from 'node:path';
-import {fileURLToPath,pathToFileURL} from 'node:url';
-import {Script} from 'node:vm';
-import {seedMarketingFixture} from './screenshot-fixture.mjs';
+import { captureNativeScreenshots } from "./native-screenshots.mjs";
 
-const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const option=name=>{const index=process.argv.indexOf(name);return index<0?undefined:process.argv[index+1];};
-assert.ok(option('--app'),'Usage: npm run screenshots -- --app /path/to/clean/transmog [--python /path/to/python] [--update-source]');
-const app=resolve(option('--app'));
-const ui=join(app,'apps/desktop/ui');
-const spec=JSON.parse(await readFile(join(root,'screenshot-source.json'),'utf8'));
-const verify=process.argv.includes('--verify');
-assert.ok(!(verify&&process.argv.includes('--update-source')),'--verify and --update-source cannot be combined.');
-const git=(...args)=>execFileSync('git',['-C',app,...args],{encoding:'utf8'}).trim();
-assert.equal(git('status','--porcelain','--untracked-files=no'),'','Capture from a clean app checkout. Commit or use a separate checkout first.');
-const commit=git('rev-parse','HEAD');
-if(!process.argv.includes('--update-source')) assert.equal(commit,spec.commit,'App revision differs from screenshot-source.json; use --update-source for an intentional refresh.');
-execFileSync(option('--python')??process.env.TRANSMOG_PYTHON??(process.platform==='win32'?'python':'python3'),[join(app,'scripts/dev-env.py'),'--check'],{cwd:app,stdio:'inherit'});
-execFileSync(process.execPath,['build-client.mjs'],{cwd:ui,stdio:'inherit'});
-const uiRequire=createRequire(join(ui,'package.json'));
-const webuiDirectory=dirname(uiRequire.resolve('@microsoft/webui/ai.md'));
-const {build,Protocol}=await import(pathToFileURL(join(webuiDirectory,'dist/index.js')).href);
-const browserRequire=createRequire(join(app,'e2e/playwright/package.json'));
-const {chromium}=browserRequire('playwright');
-const initial=JSON.parse(await readFile(join(ui,'src/initial-state.json'),'utf8'));
-const scriptDeclarations=await readFile(join(app,'crates/proxy-script/generated/transmog-script.d.ts'),'utf8');
-const built=build({appDir:join(ui,'src'),plugin:'webui',css:'link',cssPublicBase:'/',cssFileNameTemplate:'[name]-[hash].[ext]',projectionManifests:[join(ui,'dist/webui-projection.json')]});
-assert.deepEqual(built.warnings,[]);
-const protocol=new Protocol(built.protocol,{plugin:'webui'});
-const html=protocol.render({...initial,viewerMode:false,language:'en',pageTitle:'Transmog',heading:'Inspect traffic without losing the thread',lifecycleLabel:'Stopped',lifecycleKind:'stopped',listener:'Not listening'}).toString().replace(/<script(?=[\s>])/g,'<script nonce="workspace-check"');
-const assets=JSON.parse(await readFile(join(ui,'dist/client-assets.json'),'utf8'));
-const resources=new Map(await Promise.all(assets.map(async a=>[a.path,{body:await readFile(join(ui,'dist',a.file)),contentType:a.contentType}])));
-resources.set('/document.css',{body:await readFile(join(ui,'src/document.css')),contentType:'text/css'});
-resources.set('/transmog-icon.svg',{body:await readFile(join(ui,'../icons/icon.svg')),contentType:'image/svg+xml'});
-for(let i=0;i<built.cssFiles.length;i+=2) resources.set('/'+built.cssFiles[i],{body:built.cssFiles[i+1],contentType:'text/css'});
-
-// Reuse the app's real command fixture, not a second imitation of its UI.
-// Explicit boundaries fail visibly if the upstream harness changes.
-const harness=await readFile(join(ui,'scripts/check-workspaces.mjs'),'utf8');
-const start=harness.indexOf('await page.addInitScript((configuration) => {');
-const boundary='}, {workspace:initial.workspace,networkProfiles:initial.networkProfiles,scriptDeclarations});';
-const end=harness.indexOf(boundary,start);
-assert.ok(start>=0&&end>start,'Upstream fixture boundary changed; update this adapter before refreshing screenshots.');
-const fixture=harness.slice(start,end)+`\n(${seedMarketingFixture.toString()})();\n`+boundary;
-const browser=await chromium.launch({headless:true});
-const errors=[];
-const output=join(root,verify?'.cache/screenshot-verify':'assets/screenshots');
-await mkdir(output,{recursive:true});
-try {
-  const page=await browser.newPage({viewport:spec.viewport,deviceScaleFactor:spec.deviceScaleFactor,locale:spec.locale,timezoneId:spec.timezoneId,colorScheme:spec.colorScheme,reducedMotion:'reduce'});
-  page.on('pageerror',error=>errors.push(error.message));
-  await page.clock.setFixedTime(new Date(spec.fixedTime));
-  await page.route('**/*',async route=>{
-    const url=new URL(route.request().url());
-    assert.equal(url.origin,'https://workspace.test','Screenshot attempted an external network request');
-    if(url.pathname==='/')return route.fulfill({contentType:'text/html',body:html,headers:{'Content-Security-Policy':"default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'self' 'nonce-workspace-check'; worker-src 'self'; style-src 'self' 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self'; require-trusted-types-for 'script'; trusted-types webui monaco"}});
-    const resource=resources.get(url.pathname);
-    if(!resource)errors.push('Missing UI asset: '+url.pathname);
-    return route.fulfill(resource??{status:404,body:'Not found'});
-  });
-  await new Script(`(async()=>{${fixture}})()`).runInNewContext({page,initial,scriptDeclarations});
-  await page.goto('https://workspace.test/');
-  await page.waitForFunction(()=>document.querySelector('app-shell')?.traffic?.queryLoaded);
-  const traffic=page.locator('traffic-workspace');
-  await traffic.locator('tr[data-session-id="demo-4"] .session-link').click();
-  await traffic.locator('message-inspector[side="response"] .body-preview').getByText(/desk-lamp/).waitFor();
-  const capture=async name=>{
-    await page.evaluate(()=>document.fonts.ready);
-    await page.mouse.move(1438,898);
-    await page.screenshot({path:join(output,name+'.png'),animations:'disabled',caret:'hide'});
-    console.log('Captured '+name);
-  };
-  await capture('traffic');
-  await traffic.getByRole('button',{name:'Timeline',exact:true}).click();
-  await page.waitForFunction(()=>{const t=document.querySelector('app-shell').traffic;return t.timelineMode&&!t.timelineBusy&&!t.timelinePending&&t.timelineEntries.length===12;});
-  await traffic.getByRole('button',{name:'Show all matches',exact:true}).click();
-  await page.evaluate(()=>{const t=document.querySelector('app-shell').traffic;t.preferences={...t.preferences,listSplit:62};});
-  await traffic.locator('traffic-timeline').getByText('12 requests',{exact:true}).waitFor();
-  await capture('timeline');
-  await traffic.getByRole('button',{name:'Timeline',exact:true}).click();
-  await traffic.locator('.selection-actions').getByRole('button',{name:'Actions',exact:true}).click();
-  await page.getByRole('button',{name:'Edit and replay',exact:true}).click();
-  await page.locator('#composer').waitFor({state:'visible'});
-  await page.locator('#composer input[name="url"]').fill('https://api.example.test/v1/products?category=desk&inStock=true');
-  await page.getByRole('button',{name:'Send request',exact:true}).click();
-  await page.waitForFunction(()=>document.querySelector('app-shell').composer?.composerResult?.status===200);
-  await page.locator('composer-workspace .body-preview').getByText(/inStockOnly/).waitFor();
-  await capture('composer');
-  assert.deepEqual(errors,[]);
-  assert.deepEqual(await page.evaluate(()=>globalThis.__cspViolations),[]);
-  const hash=async file=>createHash('sha256').update(await readFile(file)).digest('hex');
-  const manifest={source:spec.repository,commit,fixtureHarnessSha256:await hash(join(ui,'scripts/check-workspaces.mjs')),fixtureSha256:await hash(join(root,'scripts/screenshot-fixture.mjs')),generatorSha256:await hash(fileURLToPath(import.meta.url)),node:process.version,platform:process.platform,browser:browser.version(),uiLockSha256:await hash(join(ui,'package-lock.json')),browserLockSha256:await hash(join(app,'e2e/playwright/package-lock.json')),capture:spec,images:{}};
-  for(const name of ['traffic','timeline','composer'])manifest.images[name+'.png']={sha256:await hash(join(output,name+'.png')),width:spec.viewport.width*spec.deviceScaleFactor,height:spec.viewport.height*spec.deviceScaleFactor};
-  manifest.capture.commit=commit;
-  if(verify) {
-    const previous=JSON.parse(await readFile(join(root,'screenshot-manifest.json'),'utf8'));
-    assert.deepEqual(manifest.images,previous.images,'Capture differed from the committed screenshots. Inspect .cache/screenshot-verify/.');
-    console.log('All three screenshots reproduced byte for byte.');
-  } else await writeFile(join(root,'screenshot-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
-  if(process.argv.includes('--update-source'))await writeFile(join(root,'screenshot-source.json'),JSON.stringify({...spec,commit},null,2)+'\n');
-} finally {await browser.close();}
+for (const argument of ["--app", "--native-executable"]) {
+  const index = process.argv.indexOf(argument);
+  if (index < 0 || !process.argv[index + 1] || process.argv[index + 1].startsWith("--")) {
+    throw new Error(
+      "Usage: npm run screenshots -- --app APP_CHECKOUT --native-executable RELEASE_EXE [--python PYTHON] [--update-source | --verify]",
+    );
+  }
+}
+await captureNativeScreenshots();

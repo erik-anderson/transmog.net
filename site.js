@@ -7,11 +7,15 @@ for (const link of document.querySelectorAll('[data-lightbox]')) {
     event.preventDefault();
     // Native dialog restores the element focused before showModal().
     link.focus({preventScroll:true});
+    const thumbnail = link.querySelector('img');
+    image.width = Number(thumbnail.getAttribute('width'));
+    image.height = Number(thumbnail.getAttribute('height'));
     image.src = link.href;
-    image.alt = link.querySelector('img').alt;
+    image.alt = thumbnail.alt;
     title.textContent = link.dataset.lightbox;
     dialog.querySelector('.original-link').href = link.href;
     dialog.showModal();
+    dialog.querySelector('.lightbox-image').scrollTo(0, 0);
     dialog.querySelector('.close-lightbox').focus();
   });
 }

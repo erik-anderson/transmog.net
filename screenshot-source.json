@@ -1,10 +1,23 @@
 {
   "repository": "https://github.com/erik-anderson/transmog.git",
-  "commit": "3d046a6ea222e070780e0d3755bac5185dff372f",
-  "viewport": { "width": 1440, "height": 900 },
+  "commit": "f2f6e8d2eaf3893fe66e068cc5e5d28396fed345",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
   "deviceScaleFactor": 2,
   "locale": "en-US",
   "timezoneId": "UTC",
   "colorScheme": "light",
-  "fixedTime": "2026-10-01T12:00:00.000Z"
+  "fixtureTime": "2026-10-01T12:00:00.000Z",
+  "previewViewport": {
+    "width": 900,
+    "height": 600
+  },
+  "release": "v0.1.10",
+  "nativeExecutableSha256": "27abd97cb078869170c137ad81cd48860af03125891a01fd7f1608a1f6bff403",
+  "workerSha256": {
+    "transmog-preview-worker.exe": "361476b8c21dc7e05cc6a14f8fc6accd4cdf1ca996d053aa402a9b49785da638",
+    "transmog-script-host.exe": "0222bdc718434d9f6457cab14ee3c5202ecf2b8742869d4efd71eb17032be476"
+  }
 }

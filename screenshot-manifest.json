@@ -1,16 +1,20 @@
 {
   "source": "https://github.com/erik-anderson/transmog.git",
-  "commit": "3d046a6ea222e070780e0d3755bac5185dff372f",
-  "fixtureHarnessSha256": "27426c89cb274963a65a585ab749826a0e9e9348c34365752fd4f2e96461177b",
-  "fixtureSha256": "fd8db3c9b10664745fee8a36e74c651e851c2c979ed3766d5793b64603c05990",
+  "commit": "f2f6e8d2eaf3893fe66e068cc5e5d28396fed345",
+  "method": "released-native-webview2",
   "node": "v24.18.0",
   "platform": "win32",
-  "browser": "153.0.8010.12",
-  "uiLockSha256": "dc40110fd7a9d8ecc394ed28210c9684497606cb2b51b31cdd88ddbd68e75123",
-  "browserLockSha256": "7b9300b016852fa1c88a9a504618ecc69a103a3a33df5b405848dc110852cd9e",
+  "browser": "Edg/155.0.4283.62",
+  "executableSha256": "27abd97cb078869170c137ad81cd48860af03125891a01fd7f1608a1f6bff403",
+  "workerSha256": {
+    "transmog-preview-worker.exe": "361476b8c21dc7e05cc6a14f8fc6accd4cdf1ca996d053aa402a9b49785da638",
+    "transmog-script-host.exe": "0222bdc718434d9f6457cab14ee3c5202ecf2b8742869d4efd71eb17032be476"
+  },
+  "fixtureSha256": "7dd6ab280d328c03aeb7dd0c92397e80c5b2a08e769321bd9af4eff79c067d32",
+  "generatorSha256": "da6f5d2dadabc87b24220db1070b17312ad076e109d063835b9a622bcfddf0f0",
   "capture": {
     "repository": "https://github.com/erik-anderson/transmog.git",
-    "commit": "3d046a6ea222e070780e0d3755bac5185dff372f",
+    "commit": "f2f6e8d2eaf3893fe66e068cc5e5d28396fed345",
     "viewport": {
       "width": 1440,
       "height": 900
@@ -19,24 +23,64 @@
     "locale": "en-US",
     "timezoneId": "UTC",
     "colorScheme": "light",
-    "fixedTime": "2026-10-01T12:00:00.000Z"
+    "fixtureTime": "2026-10-01T12:00:00.000Z",
+    "previewViewport": {
+      "width": 900,
+      "height": 600
+    },
+    "release": "v0.1.10",
+    "nativeExecutableSha256": "27abd97cb078869170c137ad81cd48860af03125891a01fd7f1608a1f6bff403",
+    "workerSha256": {
+      "transmog-preview-worker.exe": "361476b8c21dc7e05cc6a14f8fc6accd4cdf1ca996d053aa402a9b49785da638",
+      "transmog-script-host.exe": "0222bdc718434d9f6457cab14ee3c5202ecf2b8742869d4efd71eb17032be476"
+    }
   },
   "images": {
     "traffic.png": {
-      "sha256": "dcac7fa0c1d9c56d959d8aa16b3f33ef90887742c4c176d4b839b610972f93f9",
+      "sha256": "cb441aa73a82c772cc75f6d1815ad57dac180a203fd075c0db44b0935aea0ec0",
       "width": 2880,
       "height": 1800
     },
-    "timeline.png": {
-      "sha256": "f09866803ec9e95020e0f2a0ba5eccc8ec5f7167b5d0e760144cee1ccd1ad267",
+    "auth-inspection.png": {
+      "sha256": "9df8a5b7c343e567950d701801de4b481caf0ebbadaf4598058292de9c5579b9",
       "width": 2880,
       "height": 1800
     },
-    "composer.png": {
-      "sha256": "da1a3f97ca93f14ab0126a6f491c08f8fd52efdd6cf17e2574076b372679a8d6",
+    "auth-timing.png": {
+      "sha256": "a4fd8eec22cc1ed8ac0a00e5a97319135143c6abca5ca0929ed136ce87a18508",
+      "width": 2880,
+      "height": 1800
+    },
+    "preview-original.png": {
+      "sha256": "ef5c4a3da44c95fd036b3f81b93ed352937b57684035c913b1e3529d7e89543a",
+      "width": 1800,
+      "height": 1200
+    },
+    "response-set-css.png": {
+      "sha256": "b5b56ecc1920f69c36b19ea5f63f89474db3c7888789b7b4d13c9aa2274a2dd3",
+      "width": 2880,
+      "height": 1800
+    },
+    "preview-css-change.png": {
+      "sha256": "542879c33925f3622d6eed43b141b0fb5bee85bc6efe14593daf130754db0d3c",
+      "width": 1800,
+      "height": 1200
+    },
+    "tls-certificates.png": {
+      "sha256": "a62f29e90d04cf136b2b8bc4d8b7c794cead622590e4ae07b7b3c26099705680",
+      "width": 2880,
+      "height": 1800
+    },
+    "tls-connection.png": {
+      "sha256": "dc411ce1b69a5d4cc53e023dcaaf032ef8bf1ef2659d6fbbc59790ec16767704",
       "width": 2880,
       "height": 1800
     }
   },
-  "generatorSha256": "e3be2ad4da416b12e3406aa8eadb14e1a90e5dfe4963832cce6933cde0c547b1"
+  "verification": {
+    "nativePagePreviews": true,
+    "distinctStylesheets": true,
+    "demoReopensAfterClear": true,
+    "tlsData": "synthetic classical connection with public fixture certificates"
+  }
 }
