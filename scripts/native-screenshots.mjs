@@ -248,6 +248,12 @@ export async function captureNativeScreenshots() {
     await main.evaluate(
       `${traffic}.querySelector('message-inspector[side="response"]').querySelectorAll('button').forEach(b=>{if(b.textContent.trim()==='Body')b.click();})`,
     );
+    // Monaco renders before its lazy JSON tokenizer finishes. Wait for actual
+    // colored key/value tokens, rather than capturing the initial plain text.
+    await waitFor(
+      `(()=>{const source=${traffic}.querySelector('message-inspector[side="response"] body-source-viewer');if(!source?.sourceEditorReady||source.model?.getLanguageId()!=='json')return false;const tokens=[...source.querySelectorAll('.source-code-host .view-line [class*="mtk"]')];const find=text=>tokens.find(node=>node.textContent.replaceAll('\\u00a0',' ')===text);const key=find('"name"'),value=find('"Desk lamp"');return key&&value&&getComputedStyle(key).color!==getComputedStyle(value).color;})()`,
+      "JSON syntax highlighting did not finish rendering",
+    );
     await main.evaluate("document.activeElement?.blur()");
     await shot(main, "traffic");
     await select("/oauth/token");
@@ -467,6 +473,7 @@ export async function captureNativeScreenshots() {
       capture,
       images,
       verification: {
+        jsonSyntaxHighlighting: true,
         nativePagePreviews: true,
         distinctStylesheets: true,
         demoReopensAfterClear: true,

@@ -11,7 +11,7 @@
     "transmog-script-host.exe": "b3967f7c692995a1ebb540def5eefc38b6d68257c580b1141df7e9c8de9a18b4"
   },
   "fixtureSha256": "7dd6ab280d328c03aeb7dd0c92397e80c5b2a08e769321bd9af4eff79c067d32",
-  "generatorSha256": "da6f5d2dadabc87b24220db1070b17312ad076e109d063835b9a622bcfddf0f0",
+  "generatorSha256": "525f9a1af7f8528f12625f0e2e57feccad45be5af5fb7456c185156ca17ea537",
   "capture": {
     "repository": "https://github.com/erik-anderson/transmog.git",
     "commit": "7e4dc065e4a4b55f23ea19a291237bff131bcc90",
@@ -37,7 +37,7 @@
   },
   "images": {
     "traffic.png": {
-      "sha256": "b25a49c79894e7ab2ff305756ce41a6077f9ad43b92b28b0007c3aac78c27268",
+      "sha256": "cb89bffd170e6965205723da4e87b038effebbcd8b9e3270e7acef9861b8b1c2",
       "width": 2880,
       "height": 1800
     },
@@ -57,7 +57,7 @@
       "height": 1200
     },
     "response-set-css.png": {
-      "sha256": "b5b56ecc1920f69c36b19ea5f63f89474db3c7888789b7b4d13c9aa2274a2dd3",
+      "sha256": "c765758a00fa68b1a9e41063587d27f13ede56d986eeb5f7e0aa5a4b5c55d164",
       "width": 2880,
       "height": 1800
     },
@@ -78,6 +78,7 @@
     }
   },
   "verification": {
+    "jsonSyntaxHighlighting": true,
     "nativePagePreviews": true,
     "distinctStylesheets": true,
     "demoReopensAfterClear": true,
