@@ -1,20 +1,21 @@
 {
   "source": "https://github.com/erik-anderson/transmog.git",
-  "commit": "7e4dc065e4a4b55f23ea19a291237bff131bcc90",
+  "commit": "23f127320fb413aef1167d2c00f709f5569bc31b",
   "method": "released-native-webview2",
   "node": "v24.22.1",
   "platform": "win32",
-  "browser": "Edg/155.0.4283.62",
-  "executableSha256": "5903fa354ee0b35274c1684671b961c8fb5c91f7a2bc802851afb96c3b6f4a6e",
+  "browser": "Edg/156.0.4314.50",
+  "executableSha256": "b7abcd9946a51e5dedc3362e838dff47c19e36a4f6c52d67adfbe572a253bf90",
+  "cliSha256": "71333b4aaeaa057c3499fb1b2e7cb2cc2a748de4c95af1553124b75d53413f52",
   "workerSha256": {
-    "transmog-preview-worker.exe": "3264ddc3d8f7f97c8fa48dcb2398d2f35cb801c3203cefe860cc1418f82b18f9",
-    "transmog-script-host.exe": "b3967f7c692995a1ebb540def5eefc38b6d68257c580b1141df7e9c8de9a18b4"
+    "transmog-preview-worker.exe": "7529df3a06a12c8d92f1125accec7998771428b342d7f1abaf086d9dff646b80",
+    "transmog-script-host.exe": "0f734d9a3cb30cc5393a396d44b2f718538c95bfb9b8f0299f1e6e424c56c239"
   },
   "fixtureSha256": "7dd6ab280d328c03aeb7dd0c92397e80c5b2a08e769321bd9af4eff79c067d32",
-  "generatorSha256": "525f9a1af7f8528f12625f0e2e57feccad45be5af5fb7456c185156ca17ea537",
+  "generatorSha256": "090e73bb5980a8c12f33a585a7250596a864a1fc38ee01f9d4760b58391749c6",
   "capture": {
     "repository": "https://github.com/erik-anderson/transmog.git",
-    "commit": "7e4dc065e4a4b55f23ea19a291237bff131bcc90",
+    "commit": "23f127320fb413aef1167d2c00f709f5569bc31b",
     "viewport": {
       "width": 1440,
       "height": 900
@@ -28,12 +29,13 @@
       "width": 900,
       "height": 600
     },
-    "release": "v0.1.14",
-    "nativeExecutableSha256": "5903fa354ee0b35274c1684671b961c8fb5c91f7a2bc802851afb96c3b6f4a6e",
+    "release": "v0.1.15",
+    "nativeExecutableSha256": "b7abcd9946a51e5dedc3362e838dff47c19e36a4f6c52d67adfbe572a253bf90",
     "workerSha256": {
-      "transmog-preview-worker.exe": "3264ddc3d8f7f97c8fa48dcb2398d2f35cb801c3203cefe860cc1418f82b18f9",
-      "transmog-script-host.exe": "b3967f7c692995a1ebb540def5eefc38b6d68257c580b1141df7e9c8de9a18b4"
-    }
+      "transmog-preview-worker.exe": "7529df3a06a12c8d92f1125accec7998771428b342d7f1abaf086d9dff646b80",
+      "transmog-script-host.exe": "0f734d9a3cb30cc5393a396d44b2f718538c95bfb9b8f0299f1e6e424c56c239"
+    },
+    "nativeCliSha256": "71333b4aaeaa057c3499fb1b2e7cb2cc2a748de4c95af1553124b75d53413f52"
   },
   "images": {
     "traffic.png": {
@@ -57,7 +59,7 @@
       "height": 1200
     },
     "response-set-css.png": {
-      "sha256": "c765758a00fa68b1a9e41063587d27f13ede56d986eeb5f7e0aa5a4b5c55d164",
+      "sha256": "b5b56ecc1920f69c36b19ea5f63f89474db3c7888789b7b4d13c9aa2274a2dd3",
       "width": 2880,
       "height": 1800
     },
@@ -67,18 +69,25 @@
       "height": 1200
     },
     "tls-certificates.png": {
-      "sha256": "a62f29e90d04cf136b2b8bc4d8b7c794cead622590e4ae07b7b3c26099705680",
+      "sha256": "c8e0f6da4dc900a5bd701d9a1b71aefd243e8e364ce610d3e80b1192d9f30f4a",
       "width": 2880,
       "height": 1800
     },
     "tls-connection.png": {
-      "sha256": "dc411ce1b69a5d4cc53e023dcaaf032ef8bf1ef2659d6fbbc59790ec16767704",
+      "sha256": "4476ef1af131f879d82c8bb21d06dd43635a38e3832914ec534e9a07afb268e5",
+      "width": 2880,
+      "height": 1800
+    },
+    "mcp-rule-draft.png": {
+      "sha256": "6516c12a303bb6ce663bb1e624ba36ac9f00da20706478b17b7b32d3f9d1a8d5",
       "width": 2880,
       "height": 1800
     }
   },
   "verification": {
     "jsonSyntaxHighlighting": true,
+    "mcpPreparedDisabledRule": true,
+    "mcpDefaultRedaction": true,
     "nativePagePreviews": true,
     "distinctStylesheets": true,
     "demoReopensAfterClear": true,

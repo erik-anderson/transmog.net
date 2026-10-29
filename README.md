@@ -22,12 +22,12 @@ Pushes to `main` run the checks and publish `dist/`. Pull requests run the same 
 
 ## Reproduce the product screenshots
 
-The eight screenshots come from the **released Windows app**, including its native captured-page previews. The current source is v0.1.10 Canary; `screenshot-source.json` pins its source commit and hashes for the app and both worker executables. The release installer was checked against the release's published `SHA256SUMS` before extraction.
+The nine screenshots come from the **released Windows app**, including its native captured-page previews. The current source is v0.1.15 Canary; `screenshot-source.json` pins its source commit and hashes for the app, CLI, and both worker executables. The release installer and CLI were checked against the release's published `SHA256SUMS` before extraction.
 
 The generator imports fictional `.test` traffic into an isolated temporary profile. It uses production commands and controls, without changing app templates or screenshot pixels. It never starts a proxy, installs certificates, or uses a personal capture. Timing and TLS metadata are synthetic examples, not performance measurements. Certificate screenshots use the app's public test certificates; the illustrated TLS connection uses classical X25519. PQC capability statements are grounded in the released implementation, not inferred from that screenshot.
 
 1. Use a clean checkout of the application at the commit in `screenshot-source.json`. Keep it separate from ongoing app edits.
-2. Use Windows with WebView2, Python 3.11+, Node 24+, and the native tools required by the app's `scripts/dev-env.py --check`. Extract the pinned release installer into a separate directory, retaining `transmog.exe`, `transmog-preview-worker.exe`, and `transmog-script-host.exe` together. The screenshot generator does not build or install the application.
+2. Use Windows with WebView2, Python 3.11+, Node 24+, and the native tools required by the app's `scripts/dev-env.py --check`. Extract the pinned release installer into a separate directory, retaining `transmog.exe`, `transmog-cli.exe`, `transmog-preview-worker.exe`, and `transmog-script-host.exe` together. The screenshot generator does not build or install the application.
 3. From this website repository run:
 
    ```sh
@@ -36,7 +36,7 @@ The generator imports fictional `.test` traffic into an isolated temporary profi
    npm run check
    ```
 
-   `--python` is optional when `TRANSMOG_PYTHON` or a working `python` is available. The script checks the app environment, copies the release executables into an owned temporary directory, imports the fixture, and captures Traffic, Auth, timing, response editing, previews, certificates, and connection details. It verifies that the modified preview differs and that a saved demo reopens after clearing Traffic. No desktop source files are modified.
+   `--python` is optional when `TRANSMOG_PYTHON` or a working `python` is available. The script checks the app environment, copies the release executables into an owned temporary directory, imports the fixture, and captures Traffic, Auth, timing, response editing, previews, certificates, connection details, and MCP rule collaboration. It waits for visible JSON syntax colors, verifies that the modified preview differs and that a saved demo reopens after clearing Traffic, and uses the real MCP connector to prepare a disabled, agent-attributed header rule. The disposable access key stays scoped to the fictional API with default redaction and is revoked after capture. No desktop source files are modified.
 
 The app viewport is 1440 × 900 and the preview viewport is 900 × 600, both at 2× scale. The generator applies the viewports, scale, sample capture time, locale, theme, and timezone from `screenshot-source.json`. `screenshot-manifest.json` records the app commit, executable, fixture and generator hashes, WebView2 version, OS, Node version, dimensions, and image hashes. The generator uses helpers from the pinned app checkout, stages images until all capture assertions pass, and records cleanup evidence under ignored `.cache/`.
 
@@ -50,7 +50,7 @@ Check out the intended **released** app revision, verify and extract its release
 npm run screenshots -- --app /path/to/transmog --native-executable /path/to/extracted/transmog.exe --python /path/to/python --update-source
 ```
 
-This updates the source pin, all eight PNGs, and their manifest together. Review every image at full size and check the page before committing them. Keep examples fictional. Update selectors and fixture records when the app's commands or UI change. Do not redraw the app or patch captured pixels.
+This updates the source pin, all nine PNGs, and their manifest together. Review every image at full size and check the page before committing them. Keep examples fictional. Update selectors and fixture records when the app's commands or UI change. Do not redraw the app or patch captured pixels.
 
 ## Domain
 

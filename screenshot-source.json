@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/erik-anderson/transmog.git",
-  "commit": "7e4dc065e4a4b55f23ea19a291237bff131bcc90",
+  "commit": "23f127320fb413aef1167d2c00f709f5569bc31b",
   "viewport": {
     "width": 1440,
     "height": 900
@@ -14,10 +14,11 @@
     "width": 900,
     "height": 600
   },
-  "release": "v0.1.14",
-  "nativeExecutableSha256": "5903fa354ee0b35274c1684671b961c8fb5c91f7a2bc802851afb96c3b6f4a6e",
+  "release": "v0.1.15",
+  "nativeExecutableSha256": "b7abcd9946a51e5dedc3362e838dff47c19e36a4f6c52d67adfbe572a253bf90",
   "workerSha256": {
-    "transmog-preview-worker.exe": "3264ddc3d8f7f97c8fa48dcb2398d2f35cb801c3203cefe860cc1418f82b18f9",
-    "transmog-script-host.exe": "b3967f7c692995a1ebb540def5eefc38b6d68257c580b1141df7e9c8de9a18b4"
-  }
+    "transmog-preview-worker.exe": "7529df3a06a12c8d92f1125accec7998771428b342d7f1abaf086d9dff646b80",
+    "transmog-script-host.exe": "0f734d9a3cb30cc5393a396d44b2f718538c95bfb9b8f0299f1e6e424c56c239"
+  },
+  "nativeCliSha256": "71333b4aaeaa057c3499fb1b2e7cb2cc2a748de4c95af1553124b75d53413f52"
 }

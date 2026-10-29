@@ -13,6 +13,7 @@ const source = JSON.parse(await readFile(resolve(root, "screenshot-source.json")
 const manifest = JSON.parse(await readFile(resolve(root, "screenshot-manifest.json"), "utf8"));
 assert.equal(source.commit, manifest.commit);
 assert.equal(source.nativeExecutableSha256, manifest.executableSha256);
+assert.equal(source.nativeCliSha256, manifest.cliSha256);
 assert.deepEqual(source.workerSha256, manifest.workerSha256);
 assert.deepEqual(source, manifest.capture, "Capture settings differ from the screenshot manifest");
 for (const [file, key] of [
@@ -80,7 +81,18 @@ try {
   });
   await page.goto(url);
   assert.equal(await page.locator("h1").count(), 1);
-  assert.equal(await page.locator("[data-lightbox]").count(), 8);
+  assert.equal(await page.locator("[data-lightbox]").count(), 9);
+  const mcp = page.locator("#mcp");
+  assert.equal(await mcp.locator("h2").textContent(), "Debug with your agent.");
+  assert.equal(
+    await mcp.locator("figcaption").textContent(),
+    "Turn a debugging conversation into a rule you can review.",
+  );
+  assert.equal(
+    await mcp.getByRole("link", { name: "Connect an agent" }).getAttribute("href"),
+    "https://github.com/erik-anderson/transmog/blob/main/docs/mcp.md",
+  );
+  assert.equal(manifest.verification.mcpPreparedDisabledRule, true);
   await page.keyboard.press("Tab");
   assert.equal(
     await page.locator(".skip-link").evaluate((e) => e === document.activeElement),
@@ -149,13 +161,23 @@ try {
       );
     }
     await page.locator(".editor-example summary").click();
-    await page.evaluate(() => scrollTo(0, 0));
-    if ([1440, 390].includes(size.width))
+    await page.evaluate(() => {
+      document.activeElement?.blur();
+      scrollTo(0, 0);
+    });
+    if ([1440, 390].includes(size.width)) {
       await page.screenshot({
         path: resolve(root, "test-results/site-" + size.width + ".png"),
         fullPage: true,
         animations: "disabled",
       });
+      const sectionHeight = Math.ceil((await mcp.boundingBox()).height) + 48;
+      await page.setViewportSize({ ...size, height: Math.max(size.height, sectionHeight) });
+      await mcp.screenshot({
+        path: resolve(root, "test-results/mcp-" + size.width + ".png"),
+        animations: "disabled",
+      });
+    }
   }
   const link = page.locator("[data-lightbox]").first();
   await link.click();
@@ -177,6 +199,16 @@ try {
     "assets/screenshots/traffic.png",
   );
   assert.equal(await noJS.getByRole("link", { name: "Download Windows preview" }).count(), 2);
+  assert.equal(
+    await noJS.locator("#mcp").getByRole("link", { name: "Connect an agent" }).count(),
+    1,
+  );
+  assert.equal(
+    await noJS
+      .getByRole("link", { name: "Enlarge the MCP rule collaboration screenshot" })
+      .getAttribute("href"),
+    "assets/screenshots/mcp-rule-draft.png",
+  );
   await noJS.locator(".editor-example summary").click();
   assert.equal(
     await noJS.getByRole("link", { name: "Enlarge the response editor screenshot" }).isVisible(),

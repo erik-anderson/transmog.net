@@ -38,6 +38,8 @@ export async function captureNativeScreenshots() {
       .update(await readFile(path))
       .digest("hex");
   const executableSha256 = await hash(source);
+  const cliSource = join(dirname(source), "transmog-cli.exe");
+  const cliSha256 = await hash(cliSource);
   const workerNames = ["transmog-preview-worker.exe", "transmog-script-host.exe"];
   const workerSha256 = Object.fromEntries(
     await Promise.all(
@@ -56,6 +58,7 @@ export async function captureNativeScreenshots() {
       spec.workerSha256,
       "Native workers differ from the pinned release",
     );
+  if (!update) assert.equal(cliSha256, spec.nativeCliSha256, "CLI differs from the pinned release");
   const run = join(root, ".cache", "native-" + randomUUID()),
     profile = join(run, "profile"),
     temporary = join(run, "temp");
@@ -66,6 +69,7 @@ export async function captureNativeScreenshots() {
   await mkdir(output, { recursive: true });
   const executable = join(run, "transmog.exe");
   await copyFile(source, executable);
+  await copyFile(cliSource, join(run, "transmog-cli.exe"));
   for (const name of workerNames) await copyFile(join(dirname(source), name), join(run, name));
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     clients = [],
@@ -346,7 +350,7 @@ export async function captureNativeScreenshots() {
       reviewedMissing: true,
       operationId: randomUUID(),
     });
-    await invoke("clear_traffic");
+    await main.evaluate(`${traffic}.clearTraffic()`);
     const beforeDemo = new Set((await targets()).map((row) => row.id));
     await invoke("open_saved_demo", {
       ownerId: setId,
@@ -457,8 +461,126 @@ export async function captureNativeScreenshots() {
     await shot(main, "tls-certificates");
     await main.evaluate(`${traffic}.showDetailsTab('connection')`);
     await shot(main, "tls-connection");
+    await main.evaluate(`${traffic}.closeTimings()`);
+    // Prepare the example through the released CLI's real authenticated MCP
+    // transport. Disposable credentials remain in memory and the owned profile.
+    await invoke("mcp_set_enabled", { enabled: true });
+    const created = await main.evaluate(`(async()=>{
+      const shell=document.querySelector('app-shell');await shell.activateView('settings');
+      shell.settings.showSettingsSection('integrations');
+      const panel=shell.settings.querySelector('mcp-settings');await panel.ready;await panel.refresh();panel.create();
+      const form=panel.mcpForm;form.elements.namedItem('name').value='Fieldwork agent';
+      form.elements.namedItem('scope').value='hosts';form.elements.namedItem('hosts').value='api.example.test';
+      form.elements.namedItem('prepare-changes').checked=true;panel.changed();
+      await panel.save(new Event('submit',{cancelable:true}));
+      if(!panel.mcpKeyDialog.open||!panel.mcpSecret)throw new Error('MCP access key creation failed');
+      const result={key:panel.mcpSecret,id:panel.mcpRows.at(-1).id};panel.closeKey();return result;
+    })()`);
+    const mcp = async (tool, input = {}) => {
+      const cliProcess = spawn(join(run, "transmog-cli.exe"), ["mcp", "call", tool], {
+        windowsHide: true,
+        env: {
+          ...process.env,
+          LOCALAPPDATA: profile,
+          TEMP: temporary,
+          TMP: temporary,
+          TRANSMOG_ACCESS_KEY: created.key,
+        },
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      let output = "",
+        diagnostic = "";
+      cliProcess.stdout.on("data", (data) => {
+        output += data;
+        if (output.length > 2 * 1024 * 1024) cliProcess.kill();
+      });
+      cliProcess.stderr.on("data", (data) => {
+        diagnostic = (diagnostic + data).slice(-4000);
+      });
+      const timer = setTimeout(() => cliProcess.kill(), 15000);
+      cliProcess.stdin.end(JSON.stringify(input));
+      try {
+        const code = await new Promise((resolve, reject) => {
+          cliProcess.once("error", reject);
+          cliProcess.once("exit", resolve);
+        });
+        assert.equal(
+          code,
+          0,
+          "MCP screenshot call failed: " +
+            tool +
+            ": " +
+            (output || diagnostic).replaceAll(created.key, "[redacted]"),
+        );
+        return JSON.parse(output);
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+    const connected = await mcp("transmog_connect");
+    assert.equal(connected.connected, true);
+    assert.equal(connected.sensitiveAccess.headersAllowed, false);
+    assert.equal(connected.sensitiveAccess.bodiesAllowed, false);
+    const preparedRule = await mcp("transmog_rule_prepare", {
+      instanceId: connected.instanceId,
+      rule: {
+        id: "catalog-cache-draft",
+        displayName: "Disable caching for the catalog API",
+        enabled: false,
+        revision: 1,
+        priority: 1,
+        matcher: {
+          method: "GET",
+          host: "api.example.test",
+          url: { kind: "exact", value: "https://api.example.test/v1/products" },
+        },
+        request: { headers: [], allowNonIdempotentBodyReplacement: false },
+        response: {
+          headers: [
+            {
+              operation: "set",
+              field: {
+                name: [...Buffer.from("Cache-Control")],
+                value: [...Buffer.from("no-store")],
+              },
+            },
+          ],
+        },
+      },
+    });
+    assert.equal(preparedRule.enabled, false, "The agent example must remain a disabled draft");
+    assert.match(preparedRule.displayName, /^MCP · Fieldwork agent · /);
+    await main.evaluate(`(async()=>{
+      const shell=document.querySelector('app-shell');await shell.activateView('automation');
+      const automation=shell.automation;await automation.refreshAutomation();await automation.showAutomationSection('rules');
+    })()`);
+    const ruleButton = `${a}.querySelector('tr.catalog-rule[data-rule-id="${preparedRule.id}"] .catalog-rule-select')`;
+    await waitFor(`${ruleButton}?.getClientRects().length`, "The MCP draft is missing from Rules");
+    await main.evaluate(`${ruleButton}.click()`);
+    await waitFor(
+      `(()=>{const editor=${a}.headerRulesEditor;return editor?.hrId===${JSON.stringify(preparedRule.id)}&&!editor.hrBusy&&!editor.hrEnabled&&editor.hrOperations.some(row=>row.name==='Cache-Control'&&row.value==='no-store');})()`,
+      "The disabled MCP draft and header operation did not finish rendering",
+    );
+    await mcp("transmog_rules_list", { instanceId: connected.instanceId });
+    await main.evaluate(
+      `(async()=>{const indicator=document.querySelector('app-shell').shadowRoot.querySelector('mcp-indicator');await indicator.refresh();document.activeElement?.blur();})()`,
+    );
+    await waitFor(
+      "document.querySelector('app-shell').shadowRoot.querySelector('mcp-indicator').mcpIndicatorText==='MCP · 1 connected'",
+    );
+    await shot(main, "mcp-rule-draft");
+    const mcpStatus = await invoke("mcp_status");
+    const grant = mcpStatus.grants.find((row) => row.id === created.id);
+    await invoke("mcp_revoke_key", { id: grant.id, revision: grant.revision });
+    await invoke("mcp_set_enabled", { enabled: false });
     assert.deepEqual(errors, []);
-    const capture = { ...spec, commit, nativeExecutableSha256: executableSha256, workerSha256 };
+    const capture = {
+      ...spec,
+      commit,
+      nativeExecutableSha256: executableSha256,
+      nativeCliSha256: cliSha256,
+      workerSha256,
+    };
     const manifest = {
       source: spec.repository,
       commit,
@@ -467,6 +589,7 @@ export async function captureNativeScreenshots() {
       platform: process.platform,
       browser: browserVersion.product,
       executableSha256,
+      cliSha256,
       workerSha256,
       fixtureSha256: await hash(join(root, "scripts/marketing-page-fixture.mjs")),
       generatorSha256: await hash(fileURLToPath(import.meta.url)),
@@ -474,6 +597,8 @@ export async function captureNativeScreenshots() {
       images,
       verification: {
         jsonSyntaxHighlighting: true,
+        mcpPreparedDisabledRule: true,
+        mcpDefaultRedaction: true,
         nativePagePreviews: true,
         distinctStylesheets: true,
         demoReopensAfterClear: true,
