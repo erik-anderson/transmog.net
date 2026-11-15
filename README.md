@@ -18,7 +18,7 @@ npm run preview
 
 Open the printed localhost URL. `build` copies an explicit allowlist into `dist/`, excluding maintenance files. `check` exercises the published output, including narrow layouts, screenshots, keyboard navigation, focus restoration and JavaScript-disabled links. Its visual evidence is saved under ignored `test-results/`.
 
-Pushes to `main` run the checks and publish `dist/`. Pull requests run the same checks without deploying. Download links go to the app's Releases page because its current builds are prereleases; GitHub's `/releases/latest` endpoint does not select Canary prereleases.
+Pushes to `main` run the checks and publish `dist/`. Pull requests run the same checks without deploying. Download links go directly to the app's [Canary release](https://github.com/erik-anderson/transmog/releases/tag/canary), which provides links to the latest downloads. GitHub's `/releases/latest` endpoint does not select Canary prereleases.
 
 ## Reproduce the product screenshots
 
