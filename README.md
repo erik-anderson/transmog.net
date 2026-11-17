@@ -22,12 +22,12 @@ Pushes to `main` run the checks and publish `dist/`. Pull requests run the same 
 
 ## Reproduce the product screenshots
 
-The nine screenshots come from the **released Windows app**, including its native captured-page previews. The current source is v0.1.15 Canary; `screenshot-source.json` pins its source commit and hashes for the app, CLI, and both worker executables. The release installer and CLI were checked against the release's published `SHA256SUMS` before extraction.
+The nine screenshots capture the **released Windows app**, including its native captured-page preview content. The original and modified page previews place that unchanged content inside illustrative, unbranded browser chrome rendered from `scripts/browser-frame.html`. The current source is v0.1.15 Canary; `screenshot-source.json` pins its source commit and hashes for the app, CLI, and both worker executables. The release installer and CLI were checked against the release's published `SHA256SUMS` before extraction.
 
 The generator imports fictional `.test` traffic into an isolated temporary profile. It uses production commands and controls, preserving captured app pixels and adding the supplied Windows title bar and border around them. It never starts a proxy, installs certificates, or uses a personal capture. Timing and TLS metadata are synthetic examples, not performance measurements. Certificate screenshots use the app's public test certificates; the illustrated TLS connection uses classical X25519. PQC capability statements are grounded in the released implementation, not inferred from that screenshot.
 
 1. Use a clean checkout of the application at the commit in `screenshot-source.json`. Keep it separate from ongoing app edits.
-2. Use Windows with WebView2, Python 3.11+, Node 24+, and the native tools required by the app's `scripts/dev-env.py --check`. Extract the pinned release installer into a separate directory, retaining `transmog.exe`, `transmog-cli.exe`, `transmog-preview-worker.exe`, and `transmog-script-host.exe` together. The screenshot generator does not build or install the application.
+2. Use Windows with WebView2, Python 3.11+, Node 24+, and the native tools required by the app's `scripts/dev-env.py --check`. Install the website dependencies and Playwright Chromium as described above. Extract the pinned release installer into a separate directory, retaining `transmog.exe`, `transmog-cli.exe`, `transmog-preview-worker.exe`, and `transmog-script-host.exe` together. The screenshot generator does not build or install the application.
 3. From this website repository run:
 
    ```sh
@@ -38,9 +38,9 @@ The generator imports fictional `.test` traffic into an isolated temporary profi
 
    `--python` is optional when `TRANSMOG_PYTHON` or a working `python` is available. The script checks the app environment, copies the release executables into an owned temporary directory, imports the fixture, and captures Traffic, Auth, timing, response editing, previews, certificates, connection details, and MCP rule collaboration. It waits for visible JSON syntax colors, verifies that the modified preview differs and that a saved demo reopens after clearing Traffic, and uses the real MCP connector to prepare a disabled, agent-attributed header rule. The disposable access key stays scoped to the fictional API with default redaction and is revoked after capture. No desktop source files are modified.
 
-The app viewport is 1440 × 900 and the preview viewport is 900 × 600, both at 2× scale. Each capture receives a 1 logical pixel (2 physical pixels) `#BABABA` outer border. Inside it, the supplied left and right Windows title bar PNGs from `scripts/screenshot-assets/` sit above the capture at their native 2× size, with `#F3F3F3` filling the space between them. The title bar is 57 physical pixels tall, making the final app images 2884 × 1861 and previews 1804 × 1261. These source assets stay outside the published image directory.
+The app viewport is 1440 × 900 and the preview viewport is 900 × 600, both at 2× scale. Each capture receives a 1 logical pixel (2 physical pixels) `#BABABA` outer border. App screenshots use the supplied left and right Windows title bar PNGs from `scripts/screenshot-assets/`, with `#F3F3F3` filling the space between them. Their title bar is 57 physical pixels tall, making the final app images 2884 × 1861. Page previews instead use the selected Joined tab browser frame, with an 88 logical pixel header, producing 1804 × 1380 images. That frame reuses only the right Windows controls PNG. Source assets and the browser HTML stay outside the published image directory.
 
-The generator applies the viewports, scale, window frame, sample capture time, locale, theme, and timezone from `screenshot-source.json`. `screenshot-manifest.json` records the app commit, executable, fixture, generator, frame renderer and title bar asset hashes, WebView2 version, OS, Node version, dimensions, and image hashes. Content pixel hashes verify that framing preserves the captured app content. The generator uses helpers from the pinned app checkout, stages images until all capture assertions pass, and records cleanup evidence under ignored `.cache/`.
+The generator applies the viewports, scale, selected frames, sample capture time, locale, theme, and timezone from `screenshot-source.json`. `screenshot-manifest.json` records the app commit, executable, fixture, generator, frame renderer, browser HTML and title bar asset hashes, browser versions, OS, Node version, dimensions, content offsets, and image hashes. Pixel checks verify that framing preserves captured content and the supplied window controls, and that the browser arrows are exact mirrors. The generator uses helpers from the pinned app checkout, stages images until all capture assertions pass, and records cleanup evidence under ignored `.cache/`.
 
 Add `--verify` to render into ignored `.cache/screenshot-verify/` without replacing the site images. This repeats the behavioral assertions and checks the image inventory; review the regenerated images visually because native browser and font updates can change pixels. `npm run check` verifies the exact published image hashes, frame colors and placement, unchanged content pixels, and generator provenance without launching the desktop app.
 
@@ -53,6 +53,12 @@ npm run screenshots -- --app /path/to/transmog --native-executable /path/to/extr
 ```
 
 This updates the source pin, all nine PNGs, and their manifest together. Review every image at full size and check the page before committing them. Keep examples fictional. Update selectors and fixture records when the app's commands or UI change. Do not redraw the app or patch captured pixels.
+
+### Compare browser frame treatments
+
+`scripts/browser-frame.html` is the editable source for the generic browser frame around the original and modified page previews. Open it directly to switch between Joined tab, Raised tab, Floating tab, and Compact tab, and between the two responses. The selected Joined tab combines the floating treatment's soft surfaces with a continuous outline around the tab and across the full window. It uses the supplied right Windows controls PNG, with no Transmog title bar or browser brand. All frame dimensions are logical pixels. The forward arrow mirrors the single connected back arrow shape with `scaleX(-1)`.
+
+Run `npm run screenshots:browser-treatments` to capture all eight combinations from that HTML at the pinned 2× density. Draft images and their source hashes go to ignored `.cache/browser-frame-treatments/`. This uses the same HTML renderer and pixel checks as production. `npm run screenshots` renders fresh unframed previews through `window.renderBrowserFrame()` using the treatment in `screenshot-source.json`. After editing the browser HTML, regenerate the product screenshots and provenance together before building and checking the site.
 
 ## Domain
 

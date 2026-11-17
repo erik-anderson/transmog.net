@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { serve } from "./preview.mjs";
 import { PNG } from "pngjs";
 import { loadScreenshotFrame } from "./screenshot-frame.mjs";
+import { browserFrameProvenance } from "./browser-frame.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const index = process.argv.indexOf("--browser-root");
 const require = createRequire(resolve(index < 0 ? root : process.argv[index + 1], "package.json"));
@@ -20,6 +21,10 @@ assert.deepEqual(source.workerSha256, manifest.workerSha256);
 assert.deepEqual(source, manifest.capture, "Capture settings differ from the screenshot manifest");
 const frame = await loadScreenshotFrame(root, source);
 assert.deepEqual(frame.provenance, manifest.framing, "Window frame changed without refreshing provenance");
+for (const [key, value] of Object.entries(await browserFrameProvenance(root, source)))
+  assert.equal(manifest.browserFraming[key], value, "Browser frame changed without refreshing provenance");
+assert.equal(manifest.verification.browserFramePixelPreservation, true);
+assert.equal(manifest.verification.mirroredBrowserArrows, true);
 const border = source.windowFrame.borderWidth * source.deviceScaleFactor;
 const titleBarHeight = manifest.framing.titleBarHeight;
 const titleBars = await Promise.all(
@@ -68,15 +73,19 @@ for (const [name, meta] of Object.entries(manifest.images)) {
   );
   assert.equal(bytes.readUInt32BE(16), meta.width);
   assert.equal(bytes.readUInt32BE(20), meta.height);
-  const viewport = name.startsWith("preview-") ? source.previewViewport : source.viewport;
+  const isPreview = name.startsWith("preview-");
+  const viewport = isPreview ? source.previewViewport : source.viewport;
+  const headerHeight = isPreview ? manifest.browserFraming.headerPixels : titleBarHeight;
   assert.equal(meta.content.width, viewport.width * source.deviceScaleFactor);
   assert.equal(meta.content.height, viewport.height * source.deviceScaleFactor);
   assert.equal(meta.width, meta.content.width + 2 * border);
-  assert.equal(meta.height, meta.content.height + titleBarHeight + 2 * border);
+  assert.equal(meta.height, meta.content.height + headerHeight + 2 * border);
+  assert.equal(meta.content.x, border);
+  assert.equal(meta.content.y, border + headerHeight);
   const image = PNG.sync.read(bytes);
   assert.equal(
     createHash("sha256")
-      .update(region(image, border, border + titleBarHeight, meta.content.width, meta.content.height))
+      .update(region(image, meta.content.x, meta.content.y, meta.content.width, meta.content.height))
       .digest("hex"),
     meta.content.rgbaSha256,
     "Framing altered captured app pixels: " + name,
@@ -87,16 +96,18 @@ for (const [name, meta] of Object.entries(manifest.images)) {
     [0, border, border, meta.height - 2 * border],
     [meta.width - border, border, border, meta.height - 2 * border],
   ]) solid(image, x, y, width, height, source.windowFrame.borderColor);
-  assert.deepEqual(region(image, border, border, titleBars[0].width, titleBarHeight), titleBars[0].data);
+  if (!isPreview)
+    assert.deepEqual(region(image, border, border, titleBars[0].width, titleBarHeight), titleBars[0].data);
   assert.deepEqual(
     region(image, meta.width - border - titleBars[1].width, border, titleBars[1].width, titleBarHeight),
     titleBars[1].data,
   );
-  solid(
-    image, border + titleBars[0].width, border,
-    meta.content.width - titleBars[0].width - titleBars[1].width, titleBarHeight,
-    source.windowFrame.titleBarColor,
-  );
+  if (!isPreview)
+    solid(
+      image, border + titleBars[0].width, border,
+      meta.content.width - titleBars[0].width - titleBars[1].width, titleBarHeight,
+      source.windowFrame.titleBarColor,
+    );
   assert.equal(
     createHash("sha256")
       .update(await readFile(resolve(root, "dist/assets/screenshots", name)))

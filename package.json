@@ -8,6 +8,7 @@
     "build": "node scripts/build.mjs",
     "preview": "node scripts/preview.mjs",
     "screenshots": "node scripts/screenshots.mjs",
+    "screenshots:browser-treatments": "node scripts/browser-frame-treatments.mjs",
     "check": "node scripts/check.mjs"
   },
   "engines": {

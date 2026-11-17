@@ -12,9 +12,9 @@
     "transmog-script-host.exe": "0f734d9a3cb30cc5393a396d44b2f718538c95bfb9b8f0299f1e6e424c56c239"
   },
   "fixtureSha256": "7dd6ab280d328c03aeb7dd0c92397e80c5b2a08e769321bd9af4eff79c067d32",
-  "generatorSha256": "1b7c4e9290de66ac1ef96717c13072bffda177ed1ee6d94bbc8eb539cdf66a2e",
+  "generatorSha256": "f38c6012419332591c9bf95ea6a3006673a949993d025164b46ba25c8afafa6b",
   "framing": {
-    "rendererSha256": "8a01aac8661e6c35bfa5b9840642d5b2841eb74811abf6bfb05ac14bb634c496",
+    "rendererSha256": "37f671e5aa0fbc3a05a813f3388a8f3c637aca34d970fc4d219d67435c40dcad",
     "assets": {
       "scripts/screenshot-assets/left-windows-title-bar.png": {
         "sha256": "c8a87bb4d7fb1f529ae7f79e8e28547f234f71f2188c4d894bca90fd33e97804",
@@ -30,6 +30,14 @@
     "borderPixels": 2,
     "titleBarHeight": 57
   },
+  "browserFraming": {
+    "rendererSha256": "7b1007d292e90f63b70507a9e38aba49a1f2275fabd23abdceaae35cfa6c0380",
+    "htmlSha256": "75faf768a0e097728e8a169ec55b069d52031f12681ea51fc9a0138ca47eead4",
+    "controlsSha256": "be2eba6a2f335a33b34cb92b431c810c9607fcebf15b344c7949be5e357382bd",
+    "treatment": "joined",
+    "browser": "153.0.8010.12",
+    "headerPixels": 176
+  },
   "capture": {
     "repository": "https://github.com/erik-anderson/transmog.git",
     "commit": "23f127320fb413aef1167d2c00f709f5569bc31b",
@@ -38,6 +46,10 @@
       "height": 900
     },
     "deviceScaleFactor": 2,
+    "browserFrame": {
+      "html": "scripts/browser-frame.html",
+      "treatment": "joined"
+    },
     "windowFrame": {
       "borderWidth": 1,
       "borderColor": "#BABABA",
@@ -68,6 +80,8 @@
       "width": 2884,
       "height": 1861,
       "content": {
+        "x": 2,
+        "y": 59,
         "width": 2880,
         "height": 1800,
         "rgbaSha256": "8e1b572521487f205e4d210f32bcf327bdbdda010af7dc19701be3e1e6a2e95b"
@@ -78,6 +92,8 @@
       "width": 2884,
       "height": 1861,
       "content": {
+        "x": 2,
+        "y": 59,
         "width": 2880,
         "height": 1800,
         "rgbaSha256": "e36ae0df1375deb634b27d922c91feb1c6f5e1f931a3d998d57edb2b2437db79"
@@ -88,16 +104,20 @@
       "width": 2884,
       "height": 1861,
       "content": {
+        "x": 2,
+        "y": 59,
         "width": 2880,
         "height": 1800,
         "rgbaSha256": "deeec61d7b34134d5a7dfc98b9d27fba8751a182932fabf74714b302dd0e2a08"
       }
     },
     "preview-original.png": {
-      "sha256": "08a5981162113709236373f5090415a5584f8c9deb8eac47a1fafd9a7f608902",
+      "sha256": "13387e9c0fe25329967dfdb4898adec70d1749913b7ebbb84d1a41110b7f71cf",
       "width": 1804,
-      "height": 1261,
+      "height": 1380,
       "content": {
+        "x": 2,
+        "y": 178,
         "width": 1800,
         "height": 1200,
         "rgbaSha256": "c08a8c0860fe5835845425c339e2096b8b1885afc889fb8f0afa0f2953b27392"
@@ -108,16 +128,20 @@
       "width": 2884,
       "height": 1861,
       "content": {
+        "x": 2,
+        "y": 59,
         "width": 2880,
         "height": 1800,
         "rgbaSha256": "0c9f572cc34562d44d41ca13b154bc4bd1f60fc3cc19d7322d4ba965f78aac00"
       }
     },
     "preview-css-change.png": {
-      "sha256": "083fd24c22fa5218e9e2f40d6ad4906fa270965813b274502537e43302d28325",
+      "sha256": "ad75830abe523cd130ff3eecc7159684efc136e0e8d7a520cb63202209a29f36",
       "width": 1804,
-      "height": 1261,
+      "height": 1380,
       "content": {
+        "x": 2,
+        "y": 178,
         "width": 1800,
         "height": 1200,
         "rgbaSha256": "5f7803880748730527bbe94c6bb0d1cdad545214957a5cd593caf48ef682794c"
@@ -128,6 +152,8 @@
       "width": 2884,
       "height": 1861,
       "content": {
+        "x": 2,
+        "y": 59,
         "width": 2880,
         "height": 1800,
         "rgbaSha256": "c9c9077f9630d48eaafaaa1841f0867e7d117e1a2b5b8c22c25d4f4a2dd6920c"
@@ -138,6 +164,8 @@
       "width": 2884,
       "height": 1861,
       "content": {
+        "x": 2,
+        "y": 59,
         "width": 2880,
         "height": 1800,
         "rgbaSha256": "d2350167d7993fe0c0808b4501ebdd163a0e03ab9d21238ca9150e5890b3376f"
@@ -148,6 +176,8 @@
       "width": 2884,
       "height": 1861,
       "content": {
+        "x": 2,
+        "y": 59,
         "width": 2880,
         "height": 1800,
         "rgbaSha256": "e2084a40be86df68d10125309dd4c861b9aa57b93608044596fc65a682e43f47"
@@ -159,6 +189,8 @@
     "mcpPreparedDisabledRule": true,
     "mcpDefaultRedaction": true,
     "nativePagePreviews": true,
+    "browserFramePixelPreservation": true,
+    "mirroredBrowserArrows": true,
     "distinctStylesheets": true,
     "demoReopensAfterClear": true,
     "tlsData": "synthetic classical connection with public fixture certificates"

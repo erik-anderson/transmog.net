@@ -6,6 +6,10 @@
     "height": 900
   },
   "deviceScaleFactor": 2,
+  "browserFrame": {
+    "html": "scripts/browser-frame.html",
+    "treatment": "joined"
+  },
   "windowFrame": {
     "borderWidth": 1,
     "borderColor": "#BABABA",

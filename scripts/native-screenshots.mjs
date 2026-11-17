@@ -6,6 +6,7 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { marketingRecords, modifiedCSS } from "./marketing-page-fixture.mjs";
 import { loadScreenshotFrame } from "./screenshot-frame.mjs";
+import { createBrowserFrameRenderer } from "./browser-frame.mjs";
 
 // The native probe uses the app's own command API and production event handlers,
 // following its isolated native acceptance harness. No system proxy is started.
@@ -76,7 +77,7 @@ export async function captureNativeScreenshots() {
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     clients = [],
     errors = [];
-  let child, main, browserVersion;
+  let child, main, browserVersion, browserFrame;
   const targets = async () => {
     const ports = new Set();
     const scan = async (path, depth = 0) => {
@@ -190,7 +191,9 @@ export async function captureNativeScreenshots() {
     );
     assert.equal(capturedBytes.readUInt32BE(16), width * spec.deviceScaleFactor);
     assert.equal(capturedBytes.readUInt32BE(20), height * spec.deviceScaleFactor);
-    const { bytes, content } = frame.render(capturedBytes);
+    const { bytes, content } = name.startsWith("preview-")
+      ? await browserFrame.render(capturedBytes, { response: name === "preview-original" ? "original" : "modified" })
+      : frame.render(capturedBytes);
     await writeFile(join(output, name + ".png"), bytes);
     images[name + ".png"] = {
       sha256: createHash("sha256").update(bytes).digest("hex"),
@@ -228,6 +231,7 @@ export async function captureNativeScreenshots() {
     }, "Native app did not expose its isolated test target");
     main = await connect(target);
     browserVersion = await main.call("Browser.getVersion");
+    browserFrame = await createBrowserFrameRenderer(root, spec);
     await main.call("Emulation.setDeviceMetricsOverride", {
       ...spec.viewport,
       deviceScaleFactor: spec.deviceScaleFactor,
@@ -600,6 +604,7 @@ export async function captureNativeScreenshots() {
       fixtureSha256: await hash(join(root, "scripts/marketing-page-fixture.mjs")),
       generatorSha256: await hash(fileURLToPath(import.meta.url)),
       framing: frame.provenance,
+      browserFraming: browserFrame.provenance,
       capture,
       images,
       verification: {
@@ -607,6 +612,8 @@ export async function captureNativeScreenshots() {
         mcpPreparedDisabledRule: true,
         mcpDefaultRedaction: true,
         nativePagePreviews: true,
+        browserFramePixelPreservation: true,
+        mirroredBrowserArrows: true,
         distinctStylesheets: true,
         demoReopensAfterClear: true,
         tlsData: "synthetic classical connection with public fixture certificates",
@@ -653,6 +660,7 @@ export async function captureNativeScreenshots() {
       } catch {}
     throw error;
   } finally {
+    await browserFrame?.close();
     for (const client of clients) client.close();
     if (child && child.exitCode === null) {
       child.kill();

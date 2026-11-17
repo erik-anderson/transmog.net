@@ -54,7 +54,7 @@ export async function loadScreenshotFrame(root, spec) {
       PNG.bitblt(capture, framed, 0, 0, capture.width, capture.height, border, border + left.height);
       return {
         bytes: PNG.sync.write(framed),
-        content: { width: capture.width, height: capture.height, rgbaSha256: sha256(capture.data) },
+        content: { x: border, y: border + left.height, width: capture.width, height: capture.height, rgbaSha256: sha256(capture.data) },
       };
     },
   };
