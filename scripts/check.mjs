@@ -5,6 +5,8 @@ import { createHash } from "node:crypto";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { serve } from "./preview.mjs";
+import { PNG } from "pngjs";
+import { loadScreenshotFrame } from "./screenshot-frame.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const index = process.argv.indexOf("--browser-root");
 const require = createRequire(resolve(index < 0 ? root : process.argv[index + 1], "package.json"));
@@ -16,6 +18,27 @@ assert.equal(source.nativeExecutableSha256, manifest.executableSha256);
 assert.equal(source.nativeCliSha256, manifest.cliSha256);
 assert.deepEqual(source.workerSha256, manifest.workerSha256);
 assert.deepEqual(source, manifest.capture, "Capture settings differ from the screenshot manifest");
+const frame = await loadScreenshotFrame(root, source);
+assert.deepEqual(frame.provenance, manifest.framing, "Window frame changed without refreshing provenance");
+const border = source.windowFrame.borderWidth * source.deviceScaleFactor;
+const titleBarHeight = manifest.framing.titleBarHeight;
+const titleBars = await Promise.all(
+  [source.windowFrame.leftTitleBar, source.windowFrame.rightTitleBar].map(async (path) =>
+    PNG.sync.read(await readFile(resolve(root, path))),
+  ),
+);
+const region = (image, x, y, width, height) => {
+  const pixels = new PNG({ width, height });
+  PNG.bitblt(image, pixels, x, y, width, height, 0, 0);
+  return pixels.data;
+};
+const solid = (image, x, y, width, height, hex) => {
+  const pixels = region(image, x, y, width, height);
+  const expected = Buffer.alloc(pixels.length);
+  const rgba = [...Buffer.from(hex.slice(1), "hex"), 255];
+  for (let offset = 0; offset < expected.length; offset += 4) expected.set(rgba, offset);
+  assert.deepEqual(pixels, expected, "Incorrect window frame color or thickness");
+};
 for (const [file, key] of [
   ["native-screenshots.mjs", "generatorSha256"],
   ["marketing-page-fixture.mjs", "fixtureSha256"],
@@ -45,6 +68,35 @@ for (const [name, meta] of Object.entries(manifest.images)) {
   );
   assert.equal(bytes.readUInt32BE(16), meta.width);
   assert.equal(bytes.readUInt32BE(20), meta.height);
+  const viewport = name.startsWith("preview-") ? source.previewViewport : source.viewport;
+  assert.equal(meta.content.width, viewport.width * source.deviceScaleFactor);
+  assert.equal(meta.content.height, viewport.height * source.deviceScaleFactor);
+  assert.equal(meta.width, meta.content.width + 2 * border);
+  assert.equal(meta.height, meta.content.height + titleBarHeight + 2 * border);
+  const image = PNG.sync.read(bytes);
+  assert.equal(
+    createHash("sha256")
+      .update(region(image, border, border + titleBarHeight, meta.content.width, meta.content.height))
+      .digest("hex"),
+    meta.content.rgbaSha256,
+    "Framing altered captured app pixels: " + name,
+  );
+  for (const [x, y, width, height] of [
+    [0, 0, meta.width, border],
+    [0, meta.height - border, meta.width, border],
+    [0, border, border, meta.height - 2 * border],
+    [meta.width - border, border, border, meta.height - 2 * border],
+  ]) solid(image, x, y, width, height, source.windowFrame.borderColor);
+  assert.deepEqual(region(image, border, border, titleBars[0].width, titleBarHeight), titleBars[0].data);
+  assert.deepEqual(
+    region(image, meta.width - border - titleBars[1].width, border, titleBars[1].width, titleBarHeight),
+    titleBars[1].data,
+  );
+  solid(
+    image, border + titleBars[0].width, border,
+    meta.content.width - titleBars[0].width - titleBars[1].width, titleBarHeight,
+    source.windowFrame.titleBarColor,
+  );
   assert.equal(
     createHash("sha256")
       .update(await readFile(resolve(root, "dist/assets/screenshots", name)))
@@ -82,6 +134,11 @@ try {
   await page.goto(url);
   assert.equal(await page.locator("h1").count(), 1);
   assert.equal(await page.locator("[data-lightbox]").count(), 9);
+  for (const [name, meta] of Object.entries(manifest.images)) {
+    const image = page.locator(`img[src="assets/screenshots/${name}"]`);
+    assert.equal(await image.getAttribute("width"), String(meta.width));
+    assert.equal(await image.getAttribute("height"), String(meta.height));
+  }
   const mcp = page.locator("#mcp");
   assert.equal(await mcp.locator("h2").textContent(), "Debug with your agent.");
   assert.equal(

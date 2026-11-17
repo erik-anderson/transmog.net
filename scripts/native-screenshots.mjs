@@ -5,6 +5,7 @@ import { createHash, randomUUID, X509Certificate } from "node:crypto";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { marketingRecords, modifiedCSS } from "./marketing-page-fixture.mjs";
+import { loadScreenshotFrame } from "./screenshot-frame.mjs";
 
 // The native probe uses the app's own command API and production event handlers,
 // following its isolated native acceptance harness. No system proxy is started.
@@ -17,6 +18,7 @@ export async function captureNativeScreenshots() {
   const app = resolve(option("--app")),
     source = resolve(option("--native-executable"));
   const spec = JSON.parse(await readFile(join(root, "screenshot-source.json"), "utf8"));
+  const frame = await loadScreenshotFrame(root, spec);
   const git = (...args) => execFileSync("git", ["-C", app, ...args], { encoding: "utf8" }).trim();
   assert.equal(
     git("status", "--porcelain", "--untracked-files=no"),
@@ -181,16 +183,20 @@ export async function captureNativeScreenshots() {
     });
     // Native previews deliberately disable page scripts, including animation callbacks.
     await delay(250);
-    const bytes = Buffer.from(
+    const capturedBytes = Buffer.from(
       (await client.call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false }))
         .data,
       "base64",
     );
+    assert.equal(capturedBytes.readUInt32BE(16), width * spec.deviceScaleFactor);
+    assert.equal(capturedBytes.readUInt32BE(20), height * spec.deviceScaleFactor);
+    const { bytes, content } = frame.render(capturedBytes);
     await writeFile(join(output, name + ".png"), bytes);
     images[name + ".png"] = {
       sha256: createHash("sha256").update(bytes).digest("hex"),
       width: bytes.readUInt32BE(16),
       height: bytes.readUInt32BE(20),
+      content,
     };
     console.log("Captured " + name);
   };
@@ -593,6 +599,7 @@ export async function captureNativeScreenshots() {
       workerSha256,
       fixtureSha256: await hash(join(root, "scripts/marketing-page-fixture.mjs")),
       generatorSha256: await hash(fileURLToPath(import.meta.url)),
+      framing: frame.provenance,
       capture,
       images,
       verification: {
